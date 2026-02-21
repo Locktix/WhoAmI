@@ -473,12 +473,19 @@ function cancelLongPress() {
   clearTimeout(pressTimer);
 }
 
-nameCard.addEventListener("touchstart", startLongPress, { passive: true });
-nameCard.addEventListener("touchend", cancelLongPress);
-nameCard.addEventListener("touchcancel", cancelLongPress);
-nameCard.addEventListener("mousedown", startLongPress);
-nameCard.addEventListener("mouseup", cancelLongPress);
-nameCard.addEventListener("mouseleave", cancelLongPress);
+document.addEventListener("touchstart", startLongPress, { passive: true });
+document.addEventListener("touchend", cancelLongPress);
+document.addEventListener("touchcancel", cancelLongPress);
+document.addEventListener("touchmove", cancelLongPress);
+document.addEventListener("mousedown", startLongPress);
+document.addEventListener("mouseup", cancelLongPress);
+document.addEventListener("mouseleave", cancelLongPress);
+document.addEventListener("mousemove", cancelLongPress);
+document.addEventListener("contextmenu", (event) => {
+  if (screens.reveal.classList.contains("active")) {
+    event.preventDefault();
+  }
+});
 
 changePersonButton.addEventListener("click", () => {
   closeActionMenu();
