@@ -9,12 +9,14 @@ const countdownNumber = document.getElementById("countdown-number");
 const nameCard = document.getElementById("name-card");
 const roleName = document.getElementById("role-name");
 const roleHint = document.getElementById("role-hint");
+const roleImage = document.getElementById("role-image");
 const actionMenu = document.getElementById("action-menu");
 const changePersonButton = document.getElementById("change-person-btn");
 const foundButton = document.getElementById("found-btn");
 const resultOverlay = document.getElementById("result-overlay");
 const resultRole = document.getElementById("result-role");
 const resultRoleHint = document.getElementById("result-role-hint");
+const resultRoleImage = document.getElementById("result-role-image");
 const resultTime = document.getElementById("result-time");
 const nextRoundButton = document.getElementById("next-round-btn");
 const greenFlash = document.getElementById("green-flash");
@@ -173,7 +175,9 @@ let pressTimer = null;
 let pressStarted = false;
 let currentRole = "";
 let currentRoleHint = "";
+let currentRoleImage = "";
 let roleShownTimestamp = 0;
+let imageFetchToken = 0;
 
 const LONG_PRESS_MS = 520;
 const FLASH_DURATION_MS = 2100;
@@ -236,6 +240,82 @@ function toKeywordHint(text) {
   return tokens.slice(0, 5).join(" • ");
 }
 
+function fallbackImageForRole(name) {
+  const initials = name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("") || "JS";
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs><rect width="256" height="256" rx="28" fill="url(#g)"/><text x="50%" y="56%" dominant-baseline="middle" text-anchor="middle" fill="#ffffff" font-family="Segoe UI, Arial" font-size="86" font-weight="700">${initials}</text></svg>`;
+  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
+}
+
+async function fetchWikipediaImage(query, language = "fr") {
+  const title = encodeURIComponent(query.trim().replace(/\s+/g, "_"));
+  const url = `https://${language}.wikipedia.org/api/rest_v1/page/summary/${title}`;
+
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      return "";
+    }
+
+    const data = await response.json();
+    return data.thumbnail?.source || data.originalimage?.source || "";
+  } catch {
+    return "";
+  }
+}
+
+async function resolveRoleImage(name, hint) {
+  const wikiQuery = `${name} ${hint.replace(/•/g, " ")}`.trim();
+  const byNameFr = await fetchWikipediaImage(name, "fr");
+  if (byNameFr) {
+    return byNameFr;
+  }
+
+  const byQueryFr = await fetchWikipediaImage(wikiQuery, "fr");
+  if (byQueryFr) {
+    return byQueryFr;
+  }
+
+  const byNameEn = await fetchWikipediaImage(name, "en");
+  if (byNameEn) {
+    return byNameEn;
+  }
+
+  const byQueryEn = await fetchWikipediaImage(wikiQuery, "en");
+  if (byQueryEn) {
+    return byQueryEn;
+  }
+
+  return fallbackImageForRole(name);
+}
+
+function applyRoleImage(url, altText) {
+  roleImage.src = url;
+  roleImage.alt = altText;
+  resultRoleImage.src = url;
+  resultRoleImage.alt = altText;
+}
+
+async function updateRoleImage(name, hint) {
+  imageFetchToken += 1;
+  const currentToken = imageFetchToken;
+  const fallback = fallbackImageForRole(name);
+  applyRoleImage(fallback, `Image de ${name}`);
+
+  const resolved = await resolveRoleImage(name, hint);
+  if (currentToken !== imageFetchToken) {
+    return;
+  }
+
+  currentRoleImage = resolved;
+  applyRoleImage(resolved, `Image de ${name}`);
+}
+
 function startCountdown(seconds = 3) {
   clearInterval(countdownTimer);
   closeActionMenu();
@@ -292,6 +372,7 @@ function revealName() {
   roleShownTimestamp = Date.now();
   roleName.textContent = currentRole;
   roleHint.textContent = currentRoleHint;
+  updateRoleImage(currentRole, currentRoleHint);
   showScreen("reveal");
 }
 
@@ -348,6 +429,9 @@ function showResultAfterDiscovery() {
   const elapsedSeconds = (elapsedMs / 1000).toFixed(1);
   resultRole.textContent = currentRole;
   resultRoleHint.textContent = currentRoleHint;
+  if (currentRoleImage) {
+    applyRoleImage(currentRoleImage, `Image de ${currentRole}`);
+  }
   resultTime.textContent = `Trouvé en ${elapsedSeconds}s`;
 
   setTimeout(() => {

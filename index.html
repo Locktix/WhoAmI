@@ -30,8 +30,11 @@
 
       <section id="reveal-screen" class="screen">
         <div id="name-card" class="name-card">
-          <p id="role-name" class="role-name">Nom</p>
-          <p id="role-hint" class="role-hint">Précision</p>
+          <img id="role-image" class="role-image" alt="Illustration du rôle" />
+          <div class="role-text">
+            <p id="role-name" class="role-name">Nom</p>
+            <p id="role-hint" class="role-hint">Précision</p>
+          </div>
         </div>
       </section>
     </main>
@@ -47,8 +50,13 @@
     <section id="result-overlay" class="result-overlay" aria-hidden="true">
       <div class="result-panel">
         <p class="chip">Bravo</p>
-        <h3 id="result-role">Rôle</h3>
-        <p id="result-role-hint" class="subtitle">Précision</p>
+        <div class="result-role-row">
+          <img id="result-role-image" class="result-role-image" alt="Illustration du rôle trouvé" />
+          <div>
+            <h3 id="result-role">Rôle</h3>
+            <p id="result-role-hint" class="subtitle">Précision</p>
+          </div>
+        </div>
         <p id="result-time" class="subtitle">Trouvé en 0.0s</p>
         <button id="next-round-btn" class="btn btn-primary">Nouvelle manche</button>
       </div>
