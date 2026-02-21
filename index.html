@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Qui Suis-Je ?</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section id="home-screen" class="screen active">
+        <div class="logo-wrap">
+          <p class="chip">Jeu mobile</p>
+          <h1>Qui suis-je ?</h1>
+          <p class="subtitle">
+            Pose ton téléphone sur ton front.<br />
+            Les autres voient le nom, pas toi.
+          </p>
+        </div>
+
+        <button id="play-btn" class="btn btn-primary">Jouer</button>
+      </section>
+
+      <section id="countdown-screen" class="screen">
+        <p class="chip">Prépare-toi</p>
+        <h2>Mets le téléphone sur ton front</h2>
+        <p class="subtitle">Le mot arrive dans...</p>
+        <div id="countdown-number" class="countdown">3</div>
+      </section>
+
+      <section id="reveal-screen" class="screen">
+        <p class="chip">Les autres joueurs voient :</p>
+        <div id="name-card" class="name-card">Nom</div>
+        <div class="actions">
+          <button id="menu-btn" class="btn btn-primary">Rejouer</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="script.js"></script>
+  </body>
+</html>
