@@ -36,6 +36,9 @@ let namePool = [];
 let countdownTimer = null;
 let wakeLock = null;
 let lastTapTimestamp = 0;
+let lastTapX = null;
+let lastTapY = null;
+let lastTouchTimestamp = 0;
 
 function showScreen(screenKey) {
   Object.values(screens).forEach((screen) => screen.classList.remove("active"));
@@ -107,6 +110,24 @@ function revealName() {
   showScreen("reveal");
 }
 
+function getEventPoint(event) {
+  if (event.changedTouches && event.changedTouches.length > 0) {
+    return {
+      x: event.changedTouches[0].clientX,
+      y: event.changedTouches[0].clientY,
+    };
+  }
+
+  if (typeof event.clientX === "number" && typeof event.clientY === "number") {
+    return {
+      x: event.clientX,
+      y: event.clientY,
+    };
+  }
+
+  return { x: 0, y: 0 };
+}
+
 playButton.addEventListener("click", () => {
   requestFullscreen();
   requestWakeLock();
@@ -114,21 +135,46 @@ playButton.addEventListener("click", () => {
 });
 
 function handleDoubleTapReplay(event) {
-  const now = Date.now();
-  const tapGap = now - lastTapTimestamp;
+  if (!screens.reveal.classList.contains("active")) {
+    return;
+  }
 
-  if (event.type === "dblclick" || (tapGap > 0 && tapGap < 320)) {
+  const now = Date.now();
+  if (event.type === "click" && now - lastTouchTimestamp < 700) {
+    return;
+  }
+
+  if (event.type === "touchend") {
+    lastTouchTimestamp = now;
+  }
+
+  const point = getEventPoint(event);
+  const tapGap = now - lastTapTimestamp;
+  const movedTooFar =
+    lastTapX !== null && lastTapY !== null
+      ? Math.hypot(point.x - lastTapX, point.y - lastTapY) > 44
+      : false;
+
+  if (event.type === "dblclick" || (tapGap > 0 && tapGap < 420 && !movedTooFar)) {
     event.preventDefault();
+    lastTapTimestamp = 0;
+    lastTapX = null;
+    lastTapY = null;
     startCountdown(3);
+    return;
   }
 
   lastTapTimestamp = now;
+  lastTapX = point.x;
+  lastTapY = point.y;
 }
 
-nameCard.addEventListener("dblclick", handleDoubleTapReplay);
 nameCard.addEventListener("touchend", handleDoubleTapReplay, { passive: false });
-screens.reveal.addEventListener("dblclick", handleDoubleTapReplay);
+nameCard.addEventListener("click", handleDoubleTapReplay);
+nameCard.addEventListener("dblclick", handleDoubleTapReplay);
 screens.reveal.addEventListener("touchend", handleDoubleTapReplay, { passive: false });
+screens.reveal.addEventListener("click", handleDoubleTapReplay);
+screens.reveal.addEventListener("dblclick", handleDoubleTapReplay);
 
 refillPool();
 showScreen("home");
