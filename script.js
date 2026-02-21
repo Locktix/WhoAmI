@@ -5,7 +5,6 @@ const screens = {
 };
 
 const playButton = document.getElementById("play-btn");
-const menuButton = document.getElementById("menu-btn");
 const countdownNumber = document.getElementById("countdown-number");
 const nameCard = document.getElementById("name-card");
 
@@ -36,6 +35,7 @@ const famousNames = [
 let namePool = [];
 let countdownTimer = null;
 let wakeLock = null;
+let lastTapTimestamp = 0;
 
 function showScreen(screenKey) {
   Object.values(screens).forEach((screen) => screen.classList.remove("active"));
@@ -113,9 +113,22 @@ playButton.addEventListener("click", () => {
   startCountdown(3);
 });
 
-menuButton.addEventListener("click", () => {
-  startCountdown(3);
-});
+function handleDoubleTapReplay(event) {
+  const now = Date.now();
+  const tapGap = now - lastTapTimestamp;
+
+  if (event.type === "dblclick" || (tapGap > 0 && tapGap < 320)) {
+    event.preventDefault();
+    startCountdown(3);
+  }
+
+  lastTapTimestamp = now;
+}
+
+nameCard.addEventListener("dblclick", handleDoubleTapReplay);
+nameCard.addEventListener("touchend", handleDoubleTapReplay, { passive: false });
+screens.reveal.addEventListener("dblclick", handleDoubleTapReplay);
+screens.reveal.addEventListener("touchend", handleDoubleTapReplay, { passive: false });
 
 refillPool();
 showScreen("home");
