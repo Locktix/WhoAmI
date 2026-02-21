@@ -29,9 +29,32 @@
       </section>
 
       <section id="reveal-screen" class="screen">
-        <div id="name-card" class="name-card">Nom</div>
+        <div id="name-card" class="name-card">
+          <p id="role-name" class="role-name">Nom</p>
+          <p id="role-hint" class="role-hint">Précision</p>
+        </div>
       </section>
     </main>
+
+    <section id="action-menu" class="action-menu" aria-hidden="true">
+      <div class="action-panel">
+        <h3>Choisis une action</h3>
+        <button id="change-person-btn" class="btn btn-primary">Changer de personne</button>
+        <button id="found-btn" class="btn btn-secondary">J'ai découvert</button>
+      </div>
+    </section>
+
+    <section id="result-overlay" class="result-overlay" aria-hidden="true">
+      <div class="result-panel">
+        <p class="chip">Bravo</p>
+        <h3 id="result-role">Rôle</h3>
+        <p id="result-role-hint" class="subtitle">Précision</p>
+        <p id="result-time" class="subtitle">Trouvé en 0.0s</p>
+        <button id="next-round-btn" class="btn btn-primary">Nouvelle manche</button>
+      </div>
+    </section>
+
+    <div id="green-flash" class="green-flash" aria-hidden="true"></div>
 
     <script src="script.js"></script>
   </body>
